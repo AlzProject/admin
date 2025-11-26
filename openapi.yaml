@@ -1,0 +1,1494 @@
+openapi: 3.0.3
+info:
+  title: AlzProject Backend API
+  version: 0.1.0
+  description: REST API for AlzProject. Uses JWT bearer auth for protected endpoints.
+tags:
+  - name: Auth
+    description: Authentication endpoints (login/register)
+  - name: Users
+    description: User management endpoints
+  - name: Tests
+    description: Test creation and management
+  - name: Sections
+    description: Sections within tests
+  - name: Questions
+    description: Questions and options
+  - name: Media
+    description: Media upload and attachments
+  - name: Attempts
+    description: Attempt lifecycle and responses
+  - name: Grading
+    description: Auto and manual grading endpoints
+  - name: Reports
+    description: Reporting endpoints
+servers:
+  - url: https://alz.adityaap.tech/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserType:
+      type: string
+      enum:
+        - participant
+        - tester
+        - admin
+    MediaFileType:
+      type: string
+      enum:
+        - image
+        - video
+        - audio
+        - interactive
+    QuestionType:
+      type: string
+      enum:
+        - scmcq
+        - mcmcq
+        - numerical
+        - text
+        - file_upload
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/UserType"
+        user_specific_info:
+          type: object
+          nullable: true
+          description: User-specific metadata stored as JSONB
+        createdAt:
+          type: string
+          format: date-time
+    UserCreate:
+      type: object
+      required:
+        - email
+        - name
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        password:
+          type: string
+          format: password
+        type:
+          $ref: "#/components/schemas/UserType"
+        user_specific_info:
+          type: object
+          nullable: true
+          description: User-specific metadata stored as JSONB
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: bearer
+        user:
+          $ref: "#/components/schemas/User"
+    Test:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        duration:
+          type: integer
+          description: Duration in seconds (nullable)
+        allowNegativeMarking:
+          type: boolean
+        allowPartialMarking:
+          type: boolean
+        shuffleQuestions:
+          type: boolean
+        shuffleOptions:
+          type: boolean
+        test_specific_info:
+          type: object
+          nullable: true
+          description: Test-specific metadata stored as JSONB
+    TestCreate:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+          default: true
+        duration:
+          type: integer
+          description: Duration in seconds (nullable)
+        allowNegativeMarking:
+          type: boolean
+          default: false
+        allowPartialMarking:
+          type: boolean
+          default: false
+        shuffleQuestions:
+          type: boolean
+          default: false
+        shuffleOptions:
+          type: boolean
+          default: false
+        test_specific_info:
+          type: object
+          nullable: true
+          description: Test-specific metadata stored as JSONB
+    Section:
+      type: object
+      properties:
+        id:
+          type: integer
+        testId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+          description: Duration in seconds (nullable)
+        createdAt:
+          type: string
+          format: date-time
+    SectionCreate:
+      type: object
+      required:
+        - title
+        - orderIndex
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+          description: Duration in seconds (nullable)
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        sectionId:
+          type: integer
+        text:
+          type: string
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        ans:
+          type: string
+          nullable: true
+          description: Canonical/correct answer for server-evaluated question types
+        maxScore:
+          type: number
+          format: float
+        negativeScore:
+          type: number
+          format: float
+        partialMarking:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    QuestionCreate:
+      type: object
+      required:
+        - text
+        - type
+      properties:
+        text:
+          type: string
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        ans:
+          type: string
+        maxScore:
+          type: number
+          format: float
+          default: 1
+        negativeScore:
+          type: number
+          format: float
+          default: 0
+        partialMarking:
+          type: boolean
+          default: false
+    Option:
+      type: object
+      properties:
+        id:
+          type: integer
+        questionId:
+          type: integer
+        text:
+          type: string
+          nullable: true
+        isCorrect:
+          type: boolean
+        weight:
+          type: number
+          format: float
+          description: Used for partial marking; default 0.0
+    OptionCreate:
+      type: object
+      properties:
+        text:
+          type: string
+        isCorrect:
+          type: boolean
+          default: false
+        weight:
+          type: number
+          format: float
+          default: 0
+    Media:
+      type: object
+      properties:
+        id:
+          type: integer
+        filename:
+          type: string
+        label:
+          type: string
+        type:
+          $ref: "#/components/schemas/MediaFileType"
+        url:
+          type: string
+          nullable: true
+          description: URL to the hosted media file
+        version:
+          type: string
+          nullable: true
+          description: Version identifier for the media
+        presignedUrl:
+          type: string
+          nullable: true
+          description: Presigned URL for uploading to S3 (only returned during upload)
+    MediaPresignedUrl:
+      type: object
+      properties:
+        presignedUrl:
+          type: string
+          description: Presigned URL for downloading from S3 (valid for 5 minutes)
+        expiresIn:
+          type: integer
+          example: 300
+          description: Expiration time in seconds
+    Attempt:
+      type: object
+      properties:
+        id:
+          type: integer
+        testId:
+          type: integer
+        userId:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        submittedAt:
+          type: string
+          format: date-time
+          nullable: true
+        totalScore:
+          type: number
+          format: float
+          nullable: true
+        status:
+          type: string
+          enum:
+            - in_progress
+            - submitted
+            - graded
+    AttemptStartRequest:
+      type: object
+      required:
+        - testId
+      properties:
+        testId:
+          type: integer
+    Response:
+      type: object
+      properties:
+        id:
+          type: integer
+        attemptId:
+          type: integer
+        questionId:
+          type: integer
+        selectedOptionIds:
+          type: array
+          items:
+            type: integer
+          nullable: true
+        answerText:
+          type: string
+          nullable: true
+        score:
+          type: number
+          format: float
+          nullable: true
+        evaluated:
+          type: boolean
+          nullable: true
+    ResponseSubmit:
+      type: object
+      required:
+        - attemptId
+        - questionId
+      properties:
+        attemptId:
+          type: integer
+        questionId:
+          type: integer
+        selectedOptionIds:
+          type: array
+          items:
+            type: integer
+        answerText:
+          type: string
+        score:
+          type: number
+          format: float
+          description: For interactive question, frontend may submit computed score; otherwise server evaluates
+    EvaluationRequest:
+      type: object
+      required:
+        - responseId
+        - score
+      properties:
+        responseId:
+          type: integer
+        score:
+          type: number
+          format: float
+        comment:
+          type: string
+    PagedList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+    TestUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        duration:
+          type: integer
+        allowNegativeMarking:
+          type: boolean
+        allowPartialMarking:
+          type: boolean
+        shuffleQuestions:
+          type: boolean
+        shuffleOptions:
+          type: boolean
+        test_specific_info:
+          type: object
+          nullable: true
+          description: Test-specific metadata stored as JSONB
+
+    SectionUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+
+    QuestionUpdate:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          $ref: "#/components/schemas/QuestionType"
+        ans:
+          type: string
+        maxScore:
+          type: number
+          format: float
+        negativeScore:
+          type: number
+          format: float
+        partialMarking:
+          type: boolean
+
+    OptionUpdate:
+      type: object
+      properties:
+        text:
+          type: string
+        isCorrect:
+          type: boolean
+        weight:
+          type: number
+          format: float
+
+    PagedUserList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      security: []
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Validation error
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login (returns JWT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+      security: []
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List users (admin/tester)
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Paged users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUserList"
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+        - Users
+      summary: Create user (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+        - bearerAuth: []
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Get user by id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - Users
+      summary: Update user (admin or self)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                type:
+                  $ref: "#/components/schemas/UserType"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Users
+      summary: Delete user (admin)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+      security:
+        - bearerAuth: []
+  /tests:
+    get:
+      tags:
+        - Tests
+      summary: List tests
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Paged tests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedList"
+    post:
+      tags:
+        - Tests
+      summary: Create a test
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+      security:
+        - bearerAuth: []
+  /tests/{testId}:
+    get:
+      tags:
+        - Tests
+      summary: Get a test (includes minimal sections list)
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Test
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+    patch:
+      tags:
+        - Tests
+      summary: Update test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Test"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Tests
+      summary: Delete test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+      security:
+        - bearerAuth: []
+  /tests/{testId}/sections:
+    post:
+      tags:
+        - Sections
+      summary: Create section inside test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SectionCreate"
+      responses:
+        "201":
+          description: Section created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - Sections
+      summary: List sections of a test
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Section"
+  /sections/{sectionId}:
+    get:
+      tags:
+        - Sections
+      summary: Get section
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Section
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+    patch:
+      tags:
+        - Sections
+      summary: Update section
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SectionUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Sections
+      summary: Delete section
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+      security:
+        - bearerAuth: []
+  /sections/{sectionId}/questions:
+    post:
+      tags:
+        - Questions
+      summary: Create question in section
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionCreate"
+      responses:
+        "201":
+          description: Question created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - Questions
+      summary: List questions in section
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+  /questions/{questionId}:
+    get:
+      tags:
+        - Questions
+      summary: Get question (with options & media)
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+    patch:
+      tags:
+        - Questions
+      summary: Update question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Questions
+      summary: Delete question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+      security:
+        - bearerAuth: []
+  /questions/{questionId}/options:
+    post:
+      tags:
+        - Questions
+      summary: Create option for question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptionCreate"
+      responses:
+        "201":
+          description: Option created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Option"
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - Questions
+      summary: List options for a question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Option"
+  /options/{optionId}:
+    patch:
+      tags:
+        - Questions
+      summary: Update option
+      parameters:
+        - name: optionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptionUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Option"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Questions
+      summary: Delete option
+      parameters:
+        - name: optionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+      security:
+        - bearerAuth: []
+  /media:
+    post:
+      tags:
+        - Media
+      summary: Get presigned URL for media upload
+      description: Returns a presigned URL for the client to upload directly to S3 (valid for 5 minutes)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  $ref: "#/components/schemas/MediaFileType"
+                label:
+                  type: string
+      responses:
+        "201":
+          description: Presigned URL generated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Media"
+                  - type: object
+                    properties:
+                      presignedUrl:
+                        type: string
+                        description: URL to use for PUT request to upload file
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - Media
+      summary: List media
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Paged list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedList"
+      security:
+        - bearerAuth: []
+  /media/{mediaId}/download:
+    get:
+      tags:
+        - Media
+      summary: Get presigned URL for media download
+      description: Returns a presigned URL for downloading media file (valid for 5 minutes)
+      parameters:
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Presigned download URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaPresignedUrl"
+      security:
+        - bearerAuth: []
+  /questions/{questionId}/media/{mediaId}:
+    post:
+      tags:
+        - Media
+      summary: Attach media to question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Attached
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Media
+      summary: Detach media from question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Detached
+      security:
+        - bearerAuth: []
+  /options/{optionId}/media/{mediaId}:
+    post:
+      tags:
+        - Media
+      summary: Attach media to option
+      responses:
+        "204":
+          description: Attached
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: optionId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+    delete:
+      tags:
+        - Media
+      summary: Detach media from option
+      responses:
+        "204":
+          description: Detached
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: optionId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mediaId
+          in: path
+          required: true
+          schema:
+            type: integer
+  /attempts:
+    post:
+      tags:
+        - Attempts
+      summary: Start an attempt (creates attempt row and returns id + start time)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttemptStartRequest"
+      responses:
+        "201":
+          description: Attempt started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attempt"
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - Attempts
+      summary: List user's attempts
+      parameters:
+        - name: user_id
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Paged list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedList"
+      security:
+        - bearerAuth: []
+  /attempts/{attemptId}:
+    get:
+      tags:
+        - Attempts
+      summary: Get attempt (and current responses)
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attempt"
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+        - Attempts
+      summary: Submit attempt (finalize and optionally trigger auto-grading)
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                submit_time:
+                  type: string
+                  format: date-time
+      responses:
+        "200":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attempt"
+      security:
+        - bearerAuth: []
+  /responses:
+    post:
+      tags:
+        - Attempts
+      summary: Submit a response for a question (can be used while attempt in progress)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseSubmit"
+      responses:
+        "201":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - Attempts
+      summary: List responses (filter by attempt or question)
+      parameters:
+        - name: attempt_id
+          in: query
+          schema:
+            type: integer
+        - name: question_id
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Paged responses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedList"
+      security:
+        - bearerAuth: []
+  /responses/{responseId}:
+    get:
+      tags:
+        - Attempts
+      summary: Get a response
+      parameters:
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+      security:
+        - bearerAuth: []
+    patch:
+      tags:
+        - Attempts
+      summary: Update response (manual edit or evaluator override)
+      parameters:
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+      security:
+        - bearerAuth: []
+  /grading/auto:
+    post:
+      tags:
+        - Grading
+      summary: Trigger auto-grading for an attempt (server-side evaluation for sc/mc mcq, numerical, text if configured)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - attempt_id
+              properties:
+                attempt_id:
+                  type: integer
+      responses:
+        "200":
+          description: Auto-grading started/completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attempt:
+                    $ref: "#/components/schemas/Attempt"
+                  graded_responses_count:
+                    type: integer
+      security:
+        - bearerAuth: []
+  /grading/manual:
+    post:
+      tags:
+        - Grading
+      summary: Manual grading entry (evaluator provides score for a response)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationRequest"
+      responses:
+        "200":
+          description: Response graded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+      security:
+        - bearerAuth: []
+  /reports/attempt/{attemptId}/score:
+    get:
+      tags:
+        - Reports
+      summary: Get final score/details for attempt
+      parameters:
+        - name: attemptId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Score report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attempt:
+                    $ref: "#/components/schemas/Attempt"
+                  responses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Response"
+                  total_score:
+                    type: number
+                    format: float
+      security:
+        - bearerAuth: []

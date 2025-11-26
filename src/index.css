@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neo-bg: #E0E7FF;
+  --color-neo-white: #FFFFFF;
+  --color-neo-black: #000000;
+  --color-neo-main: #818cf8;
+  --color-neo-accent: #f472b6;
+  --color-neo-success: #4ade80;
+  --color-neo-warning: #fbbf24;
+  --color-neo-error: #f87171;
+  
+  --shadow-neo: 5px 5px 0px 0px #000000;
+  --shadow-neo-sm: 3px 3px 0px 0px #000000;
+  --shadow-neo-hover: 7px 7px 0px 0px #000000;
+}
+
+/* Custom Utility Classes for Neobrutalism */
+.neo-card {
+  @apply bg-neo-white border-2 border-neo-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)];
+}
+
+.neo-btn {
+  @apply bg-neo-main text-neo-black border-2 border-neo-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-bold px-4 py-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all hover:-translate-y-0.5 hover:translate-x-0 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] cursor-pointer;
+}
+
+.neo-btn-secondary {
+  @apply bg-neo-white text-neo-black border-2 border-neo-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-bold px-4 py-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all hover:-translate-y-0.5 hover:translate-x-0 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] cursor-pointer;
+}
+
+.neo-btn-danger {
+  @apply bg-neo-error text-neo-black border-2 border-neo-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-bold px-4 py-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all hover:-translate-y-0.5 hover:translate-x-0 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] cursor-pointer;
+}
+
+.neo-input {
+  @apply w-full p-2 border-2 border-neo-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] transition-all;
+}
+
+body {
+  @apply bg-neo-bg text-neo-black font-sans;
+}
