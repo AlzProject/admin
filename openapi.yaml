@@ -195,6 +195,10 @@ components:
         duration:
           type: integer
           description: Duration in seconds (nullable)
+        config:
+          type: object
+          nullable: true
+          description: Section-specific configuration stored as JSONB
         createdAt:
           type: string
           format: date-time
@@ -213,6 +217,10 @@ components:
         duration:
           type: integer
           description: Duration in seconds (nullable)
+        config:
+          type: object
+          nullable: true
+          description: Section-specific configuration stored as JSONB
     Question:
       type: object
       properties:
@@ -236,6 +244,10 @@ components:
           format: float
         partialMarking:
           type: boolean
+        config:
+          type: object
+          nullable: true
+          description: Question-specific configuration stored as JSONB
         createdAt:
           type: string
           format: date-time
@@ -262,6 +274,10 @@ components:
         partialMarking:
           type: boolean
           default: false
+        config:
+          type: object
+          nullable: true
+          description: Question-specific configuration stored as JSONB
     Option:
       type: object
       properties:
@@ -278,6 +294,10 @@ components:
           type: number
           format: float
           description: Used for partial marking; default 0.0
+        config:
+          type: object
+          nullable: true
+          description: Option-specific configuration stored as JSONB
     OptionCreate:
       type: object
       properties:
@@ -290,6 +310,10 @@ components:
           type: number
           format: float
           default: 0
+        config:
+          type: object
+          nullable: true
+          description: Option-specific configuration stored as JSONB
     Media:
       type: object
       properties:
@@ -461,6 +485,10 @@ components:
           type: integer
         duration:
           type: integer
+        config:
+          type: object
+          nullable: true
+          description: Section-specific configuration stored as JSONB
 
     QuestionUpdate:
       type: object
@@ -479,6 +507,10 @@ components:
           format: float
         partialMarking:
           type: boolean
+        config:
+          type: object
+          nullable: true
+          description: Question-specific configuration stored as JSONB
 
     OptionUpdate:
       type: object
@@ -490,6 +522,10 @@ components:
         weight:
           type: number
           format: float
+        config:
+          type: object
+          nullable: true
+          description: Option-specific configuration stored as JSONB
 
     PagedUserList:
       type: object

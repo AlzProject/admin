@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { Trash2, Plus, Edit, FileEdit } from 'lucide-react';
 import Modal from '../components/Modal';
+import JsonConfigArea from '../components/JsonConfigArea';
 
 const Tests = () => {
   const [page, setPage] = useState(0);
@@ -21,7 +22,8 @@ const Tests = () => {
     allowNegativeMarking: false,
     allowPartialMarking: false,
     shuffleQuestions: false,
-    shuffleOptions: false
+    shuffleOptions: false,
+    test_specific_info: null
   };
   
   const [formData, setFormData] = useState(initialFormState);
@@ -100,7 +102,8 @@ const Tests = () => {
         allowNegativeMarking: test.allowNegativeMarking,
         allowPartialMarking: test.allowPartialMarking,
         shuffleQuestions: test.shuffleQuestions,
-        shuffleOptions: test.shuffleOptions
+        shuffleOptions: test.shuffleOptions,
+        test_specific_info: test.test_specific_info
     });
     setIsModalOpen(true);
   };
@@ -221,6 +224,12 @@ const Tests = () => {
               onChange={(e) => setFormData({...formData, description: e.target.value})}
             />
           </div>
+
+          <JsonConfigArea 
+            value={formData.test_specific_info} 
+            onChange={(newConfig) => setFormData({...formData, test_specific_info: newConfig})} 
+            label="Test Specific Info (JSON)"
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div>

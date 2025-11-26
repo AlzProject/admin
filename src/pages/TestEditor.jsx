@@ -2,19 +2,25 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
-import { ArrowLeft, Plus, Trash2, Save, ChevronDown, ChevronRight, GripVertical } from 'lucide-react';
-import clsx from 'clsx';
+import { ArrowLeft, Plus, Trash2, Save, ChevronDown, ChevronRight, Settings, Edit2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import MediaManager from '../components/MediaManager';
+import JsonConfigArea from '../components/JsonConfigArea';
 
 // --- Component: Option Editor ---
 const OptionEditor = ({ questionId, options }) => {
     const queryClient = useQueryClient();
     const [newOptionText, setNewOptionText] = useState('');
+    const [newOptionConfig, setNewOptionConfig] = useState(null);
+    const [expandedOptionId, setExpandedOptionId] = useState(null); // To toggle config view
 
     const createOptionMutation = useMutation({
         mutationFn: (data) => api.post(`/questions/${questionId}/options`, data),
-        onSuccess: () => queryClient.invalidateQueries(['options', questionId])
+        onSuccess: () => {
+            queryClient.invalidateQueries(['options', questionId]);
+            setNewOptionText('');
+            setNewOptionConfig(null);
+        }
     });
 
     const deleteOptionMutation = useMutation({
@@ -40,8 +46,12 @@ const OptionEditor = ({ questionId, options }) => {
     const handleAdd = (e) => {
         e.preventDefault();
         if (!newOptionText.trim()) return;
-        createOptionMutation.mutate({ text: newOptionText, isCorrect: false, weight: 0 });
-        setNewOptionText('');
+        createOptionMutation.mutate({ 
+            text: newOptionText, 
+            isCorrect: false, 
+            weight: 0,
+            config: newOptionConfig
+        });
     };
 
     return (
@@ -50,25 +60,45 @@ const OptionEditor = ({ questionId, options }) => {
             <div className="space-y-4">
                 {options?.map((opt) => (
                     <div key={opt.id} className="bg-neo-white border border-neo-black p-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                             <input 
                                 type="checkbox" 
                                 checked={opt.isCorrect}
                                 onChange={(e) => updateOptionMutation.mutate({ id: opt.id, data: { isCorrect: e.target.checked } })}
-                                className="w-5 h-5 border-2 border-neo-black accent-neo-success cursor-pointer"
+                                className="w-5 h-5 border-2 border-neo-black accent-neo-success cursor-pointer mt-1"
                             />
-                            <input 
-                                type="text" 
-                                value={opt.text || ''}
-                                onChange={(e) => updateOptionMutation.mutate({ id: opt.id, data: { text: e.target.value } })}
-                                className="flex-1 bg-transparent border-none focus:ring-0 font-medium"
-                            />
-                            <button 
-                                onClick={() => deleteOptionMutation.mutate(opt.id)}
-                                className="text-neo-error hover:text-neo-black"
-                            >
-                                <Trash2 size={16} />
-                            </button>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={opt.text || ''}
+                                        onChange={(e) => updateOptionMutation.mutate({ id: opt.id, data: { text: e.target.value } })}
+                                        className="flex-1 bg-transparent border-none focus:ring-0 font-medium"
+                                    />
+                                    <button 
+                                        onClick={() => setExpandedOptionId(expandedOptionId === opt.id ? null : opt.id)}
+                                        className={`p-1 border-2 ${expandedOptionId === opt.id ? 'bg-neo-main border-neo-black' : 'border-transparent hover:bg-gray-200'}`}
+                                        title="Option Settings (JSON)"
+                                    >
+                                        <Settings size={16} />
+                                    </button>
+                                    <button 
+                                        onClick={() => deleteOptionMutation.mutate(opt.id)}
+                                        className="text-neo-error hover:text-neo-black"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+
+                                {expandedOptionId === opt.id && (
+                                    <div className="mt-2 border-t border-gray-200 pt-2">
+                                        <JsonConfigArea 
+                                            value={opt.config}
+                                            onChange={(newConfig) => updateOptionMutation.mutate({ id: opt.id, data: { config: newConfig } })}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         
                         {/* Media Manager for Option */}
@@ -82,16 +112,27 @@ const OptionEditor = ({ questionId, options }) => {
                         </div>
                     </div>
                 ))}
-                <form onSubmit={handleAdd} className="flex gap-2">
-                    <input 
-                        type="text" 
-                        placeholder="New Option..."
-                        value={newOptionText}
-                        onChange={(e) => setNewOptionText(e.target.value)}
-                        className="flex-1 p-1 border-2 border-neo-black text-sm"
-                    />
-                    <button type="submit" className="bg-neo-black text-neo-white px-3 text-sm font-bold hover:bg-gray-800">ADD</button>
-                </form>
+                
+                {/* Add New Option Form */}
+                <div className="border-2 border-dashed border-neo-black p-2">
+                    <form onSubmit={handleAdd} className="flex gap-2 mb-2">
+                        <input 
+                            type="text" 
+                            placeholder="New Option..."
+                            value={newOptionText}
+                            onChange={(e) => setNewOptionText(e.target.value)}
+                            className="flex-1 p-1 border-2 border-neo-black text-sm"
+                        />
+                        <button type="submit" className="bg-neo-black text-neo-white px-3 text-sm font-bold hover:bg-gray-800">ADD</button>
+                    </form>
+                    <details className="text-xs">
+                        <summary className="cursor-pointer font-bold text-gray-500 hover:text-neo-black">Optional Config (JSON)</summary>
+                        <JsonConfigArea 
+                            value={newOptionConfig} 
+                            onChange={setNewOptionConfig} 
+                        />
+                    </details>
+                </div>
             </div>
         </div>
     );
@@ -200,6 +241,12 @@ const QuestionItem = ({ question: initialQuestion, sectionId }) => {
                                     onChange={(e) => setEditData({...editData, ans: e.target.value})}
                                 />
                             )}
+                            
+                            <JsonConfigArea 
+                                value={editData.config}
+                                onChange={(newConfig) => setEditData({...editData, config: newConfig})}
+                            />
+
                             <div className="flex justify-end gap-2 mt-2">
                                 <button onClick={() => setIsEditing(false)} className="neo-btn-secondary text-sm">Cancel</button>
                                 <button onClick={handleSave} className="neo-btn text-sm">Save</button>
@@ -215,6 +262,12 @@ const QuestionItem = ({ question: initialQuestion, sectionId }) => {
                                 </div>
                             </div>
                             {!isExpanded && <p className="text-gray-500 text-sm truncate">Click to expand and edit options/details</p>}
+                            {/* Show snippet of config if exists */}
+                            {question.config && (
+                                <div className="mt-1">
+                                    <span className="text-[10px] bg-gray-200 px-1 rounded text-gray-600 font-mono">JSON Config Active</span>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -258,8 +311,17 @@ const SectionItem = ({ section, testId }) => {
     const queryClient = useQueryClient();
     const [isExpanded, setIsExpanded] = useState(true);
     const [isAddingQuestion, setIsAddingQuestion] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [newQText, setNewQText] = useState('');
     const [newQType, setNewQType] = useState('scmcq');
+    const [newQConfig, setNewQConfig] = useState(null);
+    
+    // Edit state for section
+    const [editSectionData, setEditSectionData] = useState({ 
+        title: section.title, 
+        description: section.description,
+        config: section.config
+    });
 
     const { data: questions } = useQuery({
         queryKey: ['questions', section.id],
@@ -276,9 +338,18 @@ const SectionItem = ({ section, testId }) => {
             queryClient.invalidateQueries(['questions', section.id]);
             setIsAddingQuestion(false);
             setNewQText('');
+            setNewQConfig(null);
         }
     });
     
+    const updateSectionMutation = useMutation({
+        mutationFn: (data) => api.patch(`/sections/${section.id}`, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['sections', testId]);
+            setIsEditing(false);
+        }
+    });
+
     const deleteSectionMutation = useMutation({
         mutationFn: () => api.delete(`/sections/${section.id}`),
         onSuccess: () => queryClient.invalidateQueries(['sections', testId])
@@ -286,26 +357,69 @@ const SectionItem = ({ section, testId }) => {
 
     const handleAddQuestion = (e) => {
         e.preventDefault();
-        createQuestionMutation.mutate({ text: newQText, type: newQType, maxScore: 1 });
+        createQuestionMutation.mutate({ 
+            text: newQText, 
+            type: newQType, 
+            maxScore: 1,
+            config: newQConfig
+        });
+    };
+
+    const handleUpdateSection = (e) => {
+        e.preventDefault();
+        updateSectionMutation.mutate(editSectionData);
     };
 
     return (
         <div className="mb-8">
             <div className="bg-neo-black text-neo-white p-4 flex justify-between items-center shadow-[5px_5px_0px_0px_rgba(0,0,0,0.2)]">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => setIsExpanded(!isExpanded)}>
-                        {isExpanded ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
+                {isEditing ? (
+                    <div className="flex-1 mr-4 bg-neo-white p-2 text-neo-black">
+                        <input 
+                            className="w-full font-bold text-xl mb-2 bg-transparent border-b-2 border-neo-black outline-none"
+                            value={editSectionData.title}
+                            onChange={(e) => setEditSectionData({...editSectionData, title: e.target.value})}
+                        />
+                        <textarea 
+                            className="w-full mb-2 bg-transparent border-b-2 border-neo-black outline-none"
+                            value={editSectionData.description || ''}
+                            onChange={(e) => setEditSectionData({...editSectionData, description: e.target.value})}
+                            placeholder="Description"
+                        />
+                        <JsonConfigArea 
+                            value={editSectionData.config}
+                            onChange={(newConfig) => setEditSectionData({...editSectionData, config: newConfig})}
+                        />
+                        <div className="flex justify-end gap-2 mt-2">
+                            <button onClick={() => setIsEditing(false)} className="text-xs font-bold uppercase border-2 border-neo-black px-2 py-1 hover:bg-gray-200">Cancel</button>
+                            <button onClick={handleUpdateSection} className="text-xs font-bold uppercase bg-neo-main border-2 border-neo-black px-2 py-1 hover:bg-neo-accent">Save</button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => setIsExpanded(!isExpanded)}>
+                            {isExpanded ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
+                        </button>
+                        <h3 className="text-xl font-black uppercase tracking-wider">{section.title}</h3>
+                        {section.config && <span className="text-[10px] bg-white/20 px-1 rounded">JSON</span>}
+                    </div>
+                )}
+                
+                <div className="flex gap-2">
+                     {!isEditing && (
+                        <button onClick={() => { setIsEditing(true); setEditSectionData(section); }} className="text-neo-white hover:text-neo-main transition-colors">
+                            <Edit2 size={20} />
+                        </button>
+                     )}
+                    <button onClick={() => {
+                        if(window.confirm('Delete section and all its questions?')) deleteSectionMutation.mutate();
+                    }} className="text-neo-error hover:text-white transition-colors">
+                        <Trash2 size={20} />
                     </button>
-                    <h3 className="text-xl font-black uppercase tracking-wider">{section.title}</h3>
                 </div>
-                <button onClick={() => {
-                    if(window.confirm('Delete section and all its questions?')) deleteSectionMutation.mutate();
-                }} className="text-neo-error hover:text-white transition-colors">
-                    <Trash2 size={20} />
-                </button>
             </div>
             
-            {isExpanded && (
+            {isExpanded && !isEditing && (
                 <div className="border-l-4 border-neo-black ml-6 pl-6 pt-6 pb-2">
                     <p className="mb-6 text-gray-600 italic border-b-2 border-gray-300 pb-2">{section.description || 'No description provided.'}</p>
                     
@@ -338,6 +452,12 @@ const SectionItem = ({ section, testId }) => {
                                         <option value="file_upload">File Upload</option>
                                     </select>
                                 </div>
+                                
+                                <JsonConfigArea 
+                                    value={newQConfig} 
+                                    onChange={setNewQConfig} 
+                                />
+
                                 <div className="flex justify-end gap-2">
                                     <button type="button" onClick={() => setIsAddingQuestion(false)} className="neo-btn-secondary">Cancel</button>
                                     <button type="submit" className="neo-btn">Create</button>
@@ -364,8 +484,11 @@ const TestEditor = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
+  const [isEditTestOpen, setIsEditTestOpen] = useState(false); // State for Test Edit Modal
   const [newSectionTitle, setNewSectionTitle] = useState('');
   const [newSectionDesc, setNewSectionDesc] = useState('');
+  const [newSectionConfig, setNewSectionConfig] = useState(null);
+  const [testEditData, setTestEditData] = useState({});
 
   const { data: test, isLoading: isTestLoading } = useQuery({
     queryKey: ['test', id],
@@ -390,13 +513,50 @@ const TestEditor = () => {
         setIsAddSectionOpen(false);
         setNewSectionTitle('');
         setNewSectionDesc('');
+        setNewSectionConfig(null);
+    }
+  });
+
+  const updateTestMutation = useMutation({
+    mutationFn: (data) => api.patch(`/tests/${id}`, data),
+    onSuccess: () => {
+        queryClient.invalidateQueries(['test', id]);
+        setIsEditTestOpen(false);
+    },
+    onError: (err) => {
+        alert('Failed to update test settings: ' + (err.response?.data?.message || err.message));
     }
   });
 
   const handleCreateSection = (e) => {
     e.preventDefault();
     const orderIndex = (sections?.length || 0) + 1;
-    createSectionMutation.mutate({ title: newSectionTitle, description: newSectionDesc, orderIndex });
+    createSectionMutation.mutate({ 
+        title: newSectionTitle, 
+        description: newSectionDesc, 
+        orderIndex,
+        config: newSectionConfig
+    });
+  };
+
+  const handleUpdateTest = (e) => {
+      e.preventDefault();
+      updateTestMutation.mutate(testEditData);
+  };
+
+  const openEditTestModal = () => {
+      setTestEditData({
+          title: test.title,
+          description: test.description,
+          isActive: test.isActive,
+          duration: test.duration,
+          allowNegativeMarking: test.allowNegativeMarking,
+          allowPartialMarking: test.allowPartialMarking,
+          shuffleQuestions: test.shuffleQuestions,
+          shuffleOptions: test.shuffleOptions,
+          test_specific_info: test.test_specific_info
+      });
+      setIsEditTestOpen(true);
   };
 
   if (isTestLoading || isSectionsLoading) return <div className="p-8 font-bold text-xl animate-pulse">Loading Editor...</div>;
@@ -418,10 +578,18 @@ const TestEditor = () => {
                 <span className="px-2 py-1 border-2 border-neo-black font-bold uppercase text-sm bg-neo-bg">
                     Duration: {test.duration}s
                 </span>
+                {test.test_specific_info && (
+                    <span className="px-2 py-1 border-2 border-neo-black font-bold uppercase text-sm bg-blue-100 flex items-center gap-1">
+                        <Settings size={12} /> JSON Config
+                    </span>
+                )}
             </div>
         </div>
-        <button className="neo-btn flex items-center gap-2">
-            <Save size={20} /> Save Test Settings
+        <button 
+            onClick={openEditTestModal}
+            className="neo-btn flex items-center gap-2"
+        >
+            <Settings size={20} /> Test Settings
         </button>
       </div>
 
@@ -470,11 +638,93 @@ const TestEditor = () => {
                     onChange={e => setNewSectionDesc(e.target.value)}
                 />
             </div>
+
+            <JsonConfigArea 
+                value={newSectionConfig} 
+                onChange={setNewSectionConfig} 
+            />
+
             <div className="flex justify-end gap-4 pt-4">
                 <button type="button" onClick={() => setIsAddSectionOpen(false)} className="neo-btn-secondary">Cancel</button>
                 <button type="submit" className="neo-btn">Create Section</button>
             </div>
          </form>
+      </Modal>
+
+      {/* Edit Test Settings Modal */}
+      <Modal isOpen={isEditTestOpen} onClose={() => setIsEditTestOpen(false)} title="Edit Test Settings">
+          <form onSubmit={handleUpdateTest} className="space-y-4">
+            <div>
+                <label className="block font-bold mb-2">Title</label>
+                <input 
+                    type="text" 
+                    className="neo-input"
+                    value={testEditData.title || ''}
+                    onChange={e => setTestEditData({...testEditData, title: e.target.value})}
+                    required 
+                />
+            </div>
+            <div>
+                <label className="block font-bold mb-2">Description</label>
+                <textarea 
+                    className="neo-input min-h-[80px]"
+                    value={testEditData.description || ''}
+                    onChange={e => setTestEditData({...testEditData, description: e.target.value})}
+                />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block font-bold mb-2">Duration (seconds)</label>
+                    <input 
+                        type="number" 
+                        className="neo-input"
+                        value={testEditData.duration || 0}
+                        onChange={e => setTestEditData({...testEditData, duration: parseInt(e.target.value)})}
+                    />
+                </div>
+                <div className="flex items-center pt-8">
+                    <label className="flex items-center gap-2 font-bold cursor-pointer select-none">
+                        <input 
+                            type="checkbox" 
+                            className="w-6 h-6 border-2 border-neo-black rounded-none accent-neo-main"
+                            checked={testEditData.isActive || false}
+                            onChange={(e) => setTestEditData({...testEditData, isActive: e.target.checked})}
+                        />
+                        Is Active
+                    </label>
+                </div>
+            </div>
+
+            <JsonConfigArea 
+                value={testEditData.test_specific_info} 
+                onChange={(newConfig) => setTestEditData({...testEditData, test_specific_info: newConfig})}
+                label="Test Specific Info (JSON)" 
+            />
+
+            <div className="border-t-2 border-neo-black pt-4 mt-4 grid grid-cols-2 gap-4">
+                <label className="flex items-center gap-2 font-bold cursor-pointer">
+                    <input type="checkbox" className="w-5 h-5 accent-neo-main" checked={testEditData.allowNegativeMarking || false} onChange={e => setTestEditData({...testEditData, allowNegativeMarking: e.target.checked})} />
+                    Negative Marking
+                </label>
+                <label className="flex items-center gap-2 font-bold cursor-pointer">
+                    <input type="checkbox" className="w-5 h-5 accent-neo-main" checked={testEditData.allowPartialMarking || false} onChange={e => setTestEditData({...testEditData, allowPartialMarking: e.target.checked})} />
+                    Partial Marking
+                </label>
+                <label className="flex items-center gap-2 font-bold cursor-pointer">
+                    <input type="checkbox" className="w-5 h-5 accent-neo-main" checked={testEditData.shuffleQuestions || false} onChange={e => setTestEditData({...testEditData, shuffleQuestions: e.target.checked})} />
+                    Shuffle Questions
+                </label>
+                <label className="flex items-center gap-2 font-bold cursor-pointer">
+                    <input type="checkbox" className="w-5 h-5 accent-neo-main" checked={testEditData.shuffleOptions || false} onChange={e => setTestEditData({...testEditData, shuffleOptions: e.target.checked})} />
+                    Shuffle Options
+                </label>
+            </div>
+
+            <div className="flex justify-end gap-4 pt-4">
+                <button type="button" onClick={() => setIsEditTestOpen(false)} className="neo-btn-secondary">Cancel</button>
+                <button type="submit" className="neo-btn">Save Changes</button>
+            </div>
+          </form>
       </Modal>
     </div>
   );
