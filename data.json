@@ -1,0 +1,558 @@
+[
+  {
+    "title": "Montreal Cognitive Assessment (MoCA)",
+    "description": "Assessment for detection of mild cognitive impairment",
+    "sections": [
+      {
+        "title": "Visuospatial / Executive",
+        "orderIndex": 1,
+        "questions": [
+          {
+            "id": 1,
+            "text": "Draw a line from a number to a letter in ascending order (1-A-2-B-3-C-4-D-5-E). End at E.",
+            "type": "file_upload",
+            "maxScore": 1,
+            "config": {
+              "title": "Trail Making",
+              "frontend_type": "drawing",
+              "backgroundImageKey": "TRAIL_MAKING_SVG"
+            }
+          },
+          {
+            "id": 2,
+            "text": "Copy the drawing of the cube as accurately as possible.",
+            "type": "file_upload",
+            "maxScore": 1,
+            "config": {
+              "title": "Copy Cube",
+              "frontend_type": "drawing",
+              "backgroundImageKey": "CUBE_SVG"
+            }
+          },
+          {
+            "id": 3,
+            "text": "Draw a clock. Put in all the numbers and set the time to 10 past 11.",
+            "type": "file_upload",
+            "maxScore": 3,
+            "config": {
+              "title": "Draw Clock",
+              "frontend_type": "drawing"
+            }
+          }
+        ]
+      },
+      {
+        "title": "Naming",
+        "orderIndex": 2,
+        "questions": [
+          {
+            "id": 4,
+            "text": "Identify the animals shown below.",
+            "type": "text",
+            "maxScore": 3,
+            "config": {
+              "title": "Naming",
+              "frontend_type": "naming_grouped",
+              "items": [
+                {
+                  "label": "Animal 1",
+                  "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg/1200px-020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg",
+                  "placeholder": "Enter animal name"
+                },
+                {
+                  "label": "Animal 2",
+                  "img": "https://d1jyxxz9imt9yb.cloudfront.net/medialib/5483/image/s768x1300/XKP144_reduced.jpg",
+                  "placeholder": "Enter animal name"
+                },
+                {
+                  "label": "Animal 3",
+                  "img": "https://cdn.britannica.com/94/152294-050-92FE0C83/Arabian-dromedary-camel.jpg",
+                  "placeholder": "Enter animal name"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Memory Registration",
+        "orderIndex": 3,
+        "questions": [
+          {
+            "id": 5,
+            "text": "Read the list of words. You will have 10 seconds to memorize them.",
+            "type": "text",
+            "maxScore": 0,
+            "config": {
+              "title": "Memory Registration",
+              "frontend_type": "memory_registration",
+              "words": [
+                "Face",
+                "Velvet",
+                "Church",
+                "Daisy",
+                "Red"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Attention",
+        "orderIndex": 4,
+        "questions": [
+          {
+            "id": 6,
+            "text": "Read the sequence of numbers displayed one by one. Then enter them in the exact order.",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "Digit Span Forward",
+              "frontend_type": "digit_span",
+              "sequence": [
+                2,
+                1,
+                8,
+                5,
+                4
+              ],
+              "subType": "Forward"
+            }
+          },
+          {
+            "id": 7,
+            "text": "Read the sequence of numbers displayed one by one. Then enter them in BACKWARD order.",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "Digit Span Backward",
+              "frontend_type": "digit_span",
+              "sequence": [
+                7,
+                4,
+                2
+              ],
+              "subType": "Backward"
+            }
+          },
+          {
+            "id": 8,
+            "text": "Tap on every letter 'A' in the sequence below.",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "Vigilance",
+              "frontend_type": "vigilance",
+              "sequence": "FBACMNAAJKLBAFAKDEAAAJAMOFAAB"
+            }
+          },
+          {
+            "id": 9,
+            "text": "Subtract 7 from 100 five times (93, 86, 79, 72, 65).",
+            "type": "text",
+            "maxScore": 3,
+            "config": {
+              "title": "Serial 7s",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "100-7",
+                "-7",
+                "-7",
+                "-7",
+                "-7"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Language",
+        "orderIndex": 5,
+        "questions": [
+          {
+            "id": 10,
+            "text": "Read the following sentence, then type it exactly as shown: 'I only know that John is the one to help today.'",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "Sentence Repetition 1",
+              "frontend_type": "text",
+              "placeholder": "Type the sentence exactly"
+            }
+          },
+          {
+            "id": 11,
+            "text": "Read the following sentence, then type it exactly as shown: 'The cat always hid under the couch when dogs were in the room.'",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "Sentence Repetition 2",
+              "frontend_type": "text",
+              "placeholder": "Type the sentence exactly"
+            }
+          },
+          {
+            "id": 12,
+            "text": "Name as many words as possible starting with 'F' in 1 minute. (Target >= 11)",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "Verbal Fluency",
+              "frontend_type": "text",
+              "placeholder": "Enter count or list words..."
+            }
+          }
+        ]
+      },
+      {
+        "title": "Abstraction",
+        "orderIndex": 6,
+        "questions": [
+          {
+            "id": 13,
+            "text": "What is the similarity between these pairs?",
+            "type": "text",
+            "maxScore": 2,
+            "config": {
+              "title": "Abstraction",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "Train - Bicycle",
+                "Watch - Ruler"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Delayed Recall",
+        "orderIndex": 7,
+        "questions": [
+          {
+            "id": 14,
+            "text": "What were the 5 words from earlier?",
+            "type": "text",
+            "maxScore": 5,
+            "config": {
+              "title": "Delayed Recall",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "Word 1",
+                "Word 2",
+                "Word 3",
+                "Word 4",
+                "Word 5"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "Orientation",
+        "orderIndex": 8,
+        "questions": [
+          {
+            "id": 15,
+            "text": "Enter the current date and place details.",
+            "type": "text",
+            "maxScore": 6,
+            "config": {
+              "title": "Orientation",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "Date",
+                "Month",
+                "Year",
+                "Day",
+                "Place",
+                "City"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "language": "en"
+  },
+  {
+    "title": "मॉन्ट्रियल कॉग्निटिव्ह असेसमेंट (MoCA)",
+    "description": "सौम्य संज्ञानात्मक कमजोरी शोधण्यासाठी मूल्यांकन",
+    "sections": [
+      {
+        "title": "दृश्य-स्थानिक / कार्यकारी",
+        "orderIndex": 1,
+        "questions": [
+          {
+            "id": 101,
+            "text": "अंक आणि अक्षरे यांना चढत्या क्रमाने जोडणारी रेषा काढा (1-A-2-B-3-C-4-D-5-E). E वर संपवा.",
+            "type": "file_upload",
+            "maxScore": 1,
+            "config": {
+              "title": "ट्रेल मेकिंग",
+              "frontend_type": "drawing",
+              "backgroundImageKey": "TRAIL_MAKING_SVG"
+            }
+          },
+          {
+            "id": 102,
+            "text": "खालील घनाचे चित्र शक्य तितके अचूक काढा.",
+            "type": "file_upload",
+            "maxScore": 1,
+            "config": {
+              "title": "घन (Cube) काढा",
+              "frontend_type": "drawing",
+              "backgroundImageKey": "CUBE_SVG"
+            }
+          },
+          {
+            "id": 103,
+            "text": "एक घड्याळ काढा. सर्व अंक लिहा आणि 11 वाजून 10 मिनिटे ही वेळ दर्शवा.",
+            "type": "file_upload",
+            "maxScore": 3,
+            "config": {
+              "title": "घड्याळ काढा",
+              "frontend_type": "drawing"
+            }
+          }
+        ]
+      },
+      {
+        "title": "नामकरण",
+        "orderIndex": 2,
+        "questions": [
+          {
+            "id": 104,
+            "text": "खालील प्राणी ओळखा.",
+            "type": "text",
+            "maxScore": 3,
+            "config": {
+              "title": "नामकरण",
+              "frontend_type": "naming_grouped",
+              "items": [
+                {
+                  "label": "प्राणी 1",
+                  "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg/1200px-020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg",
+                  "placeholder": "प्राण्याचे नाव प्रविष्ट करा"
+                },
+                {
+                  "label": "प्राणी 2",
+                  "img": "https://d1jyxxz9imt9yb.cloudfront.net/medialib/5483/image/s768x1300/XKP144_reduced.jpg",
+                  "placeholder": "प्राण्याचे नाव प्रविष्ट करा"
+                },
+                {
+                  "label": "प्राणी 3",
+                  "img": "https://cdn.britannica.com/94/152294-050-92FE0C83/Arabian-dromedary-camel.jpg",
+                  "placeholder": "प्राण्याचे नाव प्रविष्ट करा"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "स्मृती नोंदणी",
+        "orderIndex": 3,
+        "questions": [
+          {
+            "id": 105,
+            "text": "शब्दांची यादी वाचा. तुम्हाला ते लक्षात ठेवण्यासाठी 10 सेकंद मिळतील.",
+            "type": "text",
+            "maxScore": 0,
+            "config": {
+              "title": "स्मृती नोंदणी",
+              "frontend_type": "memory_registration",
+              "words": [
+                "चेहरा",
+                "मखमली",
+                "चर्च",
+                "डेझी",
+                "लाल"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "लक्ष",
+        "orderIndex": 4,
+        "questions": [
+          {
+            "id": 106,
+            "text": "एक-एक करून दिसणारे अंक वाचा. नंतर ते त्याच क्रमाने प्रविष्ट करा.",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "अंक क्रम (सरळ)",
+              "frontend_type": "digit_span",
+              "sequence": [
+                2,
+                1,
+
+                8,
+                5,
+                4
+              ],
+              "subType": "Forward"
+            }
+          },
+          {
+            "id": 107,
+            "text": "एक-एक करून दिसणारे अंक वाचा. नंतर ते उलट क्रमाने प्रविष्ट करा.",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "अंक क्रम (उलट)",
+              "frontend_type": "digit_span",
+              "sequence": [
+                7,
+                4,
+                2
+              ],
+              "subType": "Backward"
+            }
+          },
+          {
+            "id": 108,
+            "text": "खालील क्रमामध्ये प्रत्येक 'A' अक्षरावर टॅप करा.",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "दक्षता",
+              "frontend_type": "vigilance",
+              "sequence": "FBACMNAAJKLBAFAKDEAAAJAMOFAAB"
+            }
+          },
+          {
+            "id": 109,
+            "text": "100 मधून पाच वेळा 7 वजा करा (93, 86, 79, 72, 65).",
+            "type": "text",
+            "maxScore": 3,
+            "config": {
+              "title": "क्रमिक 7",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "100-7",
+                "-7",
+                "-7",
+
+                "-7",
+                "-7"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "भाषा",
+        "orderIndex": 5,
+        "questions": [
+          {
+            "id": 110,
+            "text": "खालील वाक्य वाचा, नंतर ते जसेच्या तसे टाइप करा: 'मला फक्त एवढेच माहित आहे की जॉन आज मदत करणार आहे.'",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "वाक्य पुनरावृत्ती 1",
+              "frontend_type": "text",
+              "placeholder": "वाक्य जसेच्या तसे टाइप करा"
+            }
+          },
+          {
+            "id": 111,
+            "text": "खालील वाक्य वाचा, नंतर ते जसेच्या तसे टाइप करा: 'जेव्हा कुत्रे खोलीत असत तेव्हा मांजर नेहमी सोफ्याखाली लपत असे.'",
+            "type": "text",
+
+            "maxScore": 1,
+            "config": {
+              "title": "वाक्य पुनरावृत्ती 2",
+              "frontend_type": "text",
+              "placeholder": "वाक्य जसेच्या तसे टाइप करा"
+            }
+          },
+          {
+            "id": 112,
+
+            "text": "1 मिनिटात 'क' ने सुरू होणारे जास्तीत जास्त शब्द सांगा. (लक्ष्य >= 11)",
+            "type": "text",
+            "maxScore": 1,
+            "config": {
+              "title": "शाब्दिक ओघ",
+              "frontend_type": "text",
+              "placeholder": "संख्या किंवा शब्दांची यादी प्रविष्ट करा..."
+            }
+          }
+        ]
+      },
+      {
+        "title": "अमूर्त विचार",
+        "orderIndex": 6,
+        "questions": [
+          {
+            "id": 113,
+            "text": "या जोड्यांमध्ये काय साम्य आहे?",
+            "type": "text",
+            "maxScore": 2,
+            "config": {
+              "title": "अमूर्त विचार",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "रेल्वे - सायकल",
+                "घड्याळ - मोजपट्टी"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "विलंबित आठवण",
+        "orderIndex": 7,
+        "questions": [
+          {
+            "id": 114,
+            "text": "मगाशी वाचलेले 5 शब्द कोणते होते?",
+            "type": "text",
+            "maxScore": 5,
+            "config": {
+              "title": "विलंबित आठवण",
+              "frontend_type": "text_grouped",
+              "fields": [
+                "शब्द 1",
+                "शब्द 2",
+                "शब्द 3",
+                "शब्द 4",
+                "शब्द 5"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "title": "अभिमुखता",
+        "orderIndex": 8,
+        "questions": [
+          {
+            "id": 115,
+            "text": "आजची तारीख आणि ठिकाणाचा तपशील प्रविष्ट करा.",
+            "type": "text",
+            "maxScore": 6,
+            "config": {
+              "title": "अभिमुखता",
+
+              "frontend_type": "text_grouped",
+              "fields": [
+                "तारीख",
+                "महिना",
+                "वर्ष",
+                "दिवस",
+                "ठिकाण",
+                "शहर"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "language": "mr"
+  }
+]
+
