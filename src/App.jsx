@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Tests from './pages/Tests';
 import TestEditor from './pages/TestEditor';
+import TestAttempts from './pages/TestAttempts';
+import AttemptDetails from './pages/AttemptDetails';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -19,6 +21,8 @@ function App() {
             <Route path="/users" element={<Users />} />
             <Route path="/tests" element={<Tests />} />
             <Route path="/tests/:id" element={<TestEditor />} />
+            <Route path="/tests/:id/attempts" element={<TestAttempts />} />
+            <Route path="/attempts/:id" element={<AttemptDetails />} />
           </Route>
         </Route>
         

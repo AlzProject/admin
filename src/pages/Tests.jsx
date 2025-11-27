@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
-import { Trash2, Plus, Edit, FileEdit } from 'lucide-react';
+import { Trash2, Plus, Edit, FileEdit, Eye } from 'lucide-react';
 import Modal from '../components/Modal';
 import JsonConfigArea from '../components/JsonConfigArea';
 
@@ -154,6 +154,13 @@ const Tests = () => {
                     title="Manage Questions & Sections"
                 >
                     <FileEdit size={20} />
+                </Link>
+                <Link 
+                    to={`/tests/${test.id}/attempts`}
+                    className="p-2 bg-neo-white border-2 border-neo-black hover:bg-neo-accent hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center"
+                    title="View Attempts"
+                >
+                    <Eye size={20} />
                 </Link>
                 <button 
                     onClick={() => openEditModal(test)}
