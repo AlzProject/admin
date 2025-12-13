@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
 import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Clock, Save } from 'lucide-react';
 import { useState } from 'react';
+import { openMediaById } from '../lib/media';
 
 // --- Component: Response Item ---
 const ResponseItem = ({ response, question, manualGradingMutation }) => {
@@ -27,14 +28,37 @@ const ResponseItem = ({ response, question, manualGradingMutation }) => {
     // Render Answer Content based on type
     const renderAnswer = () => {
         if (question.type === 'file_upload') {
+            const raw = (response.answerText || '').trim();
+            const isMediaRef = raw.toLowerCase().startsWith('media:');
+            const mediaId = isMediaRef ? raw.slice('media:'.length).trim() : null;
+
             return (
                 <div className="bg-gray-100 p-2 border border-neo-black inline-block">
                     <span className="font-bold text-sm">File Uploaded: </span>
-                    {response.answerText ? (
-                        <a href={response.answerText} target="_blank" rel="noopener noreferrer" className="text-neo-main hover:underline font-mono">
-                            View File
-                        </a>
-                    ) : <span className="text-gray-500 italic">No file link available</span>}
+                    {raw ? (
+                        isMediaRef && mediaId ? (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        await openMediaById(mediaId);
+                                    } catch (err) {
+                                        console.error('Failed to open media', err);
+                                        alert('Error opening media');
+                                    }
+                                }}
+                                className="text-neo-main hover:underline font-mono"
+                            >
+                                View File
+                            </button>
+                        ) : (
+                            <a href={raw} target="_blank" rel="noopener noreferrer" className="text-neo-main hover:underline font-mono">
+                                View File
+                            </a>
+                        )
+                    ) : (
+                        <span className="text-gray-500 italic">No file link available</span>
+                    )}
                 </div>
             );
         }

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth';
 import { LayoutDashboard, Users, FileText, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 

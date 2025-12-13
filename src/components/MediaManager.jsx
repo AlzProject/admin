@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../lib/api';
+import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { Upload, X, Image, Video, Music, FileDigit, Trash2, ExternalLink } from 'lucide-react';
+import { Upload, X, Image, Video, Music, FileDigit, ExternalLink } from 'lucide-react';
 import Modal from './Modal';
+import api from '../lib/api';
+import { openMediaById } from '../lib/media';
 
 const MediaManager = ({ attachedMedia, onAttach, onDetach, contextType = 'question' }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,12 +72,7 @@ const MediaManager = ({ attachedMedia, onAttach, onDetach, contextType = 'questi
 
   const handleMediaClick = async (mediaId) => {
       try {
-          const res = await api.get(`/media/${mediaId}/download`);
-          if (res.data.presignedUrl) {
-              window.open(res.data.presignedUrl, '_blank');
-          } else {
-              alert('Could not get download URL');
-          }
+          await openMediaById(mediaId);
       } catch (err) {
           console.error('Failed to get download URL', err);
           alert('Error opening media');

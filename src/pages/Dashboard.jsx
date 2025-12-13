@@ -48,7 +48,7 @@ const Dashboard = () => {
       try {
         const res = await api.get('/attempts?limit=1'); 
         return res.data;
-      } catch (e) {
+      } catch (_e) {
         return { total: 0 };
       }
     }

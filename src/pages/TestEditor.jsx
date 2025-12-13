@@ -481,7 +481,7 @@ const SectionItem = ({ section, testId }) => {
 // --- Main Component: Test Editor ---
 const TestEditor = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+    const _navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const [isEditTestOpen, setIsEditTestOpen] = useState(false); // State for Test Edit Modal

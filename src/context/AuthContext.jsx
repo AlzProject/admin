@@ -1,29 +1,19 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState } from 'react';
 import api from '../lib/api';
-
-const AuthContext = createContext();
+import { AuthContext } from './auth';
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (token) {
-        // Verify token or load user details if needed
-        // For now, we just assume the token is valid until 401
-        // Ideally we would hit /users/me or similar if available, 
-        // but the OpenAPI spec doesn't explicitly show a /me endpoint, 
-        // we might need to decode the token or store user info in localStorage too.
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
-    } else {
-        setLoading(false);
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return null;
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      return null;
     }
-  }, [token]);
+  });
+  const loading = false;
 
   const login = async (email, password) => {
     try {
@@ -55,6 +45,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => useContext(AuthContext);
 

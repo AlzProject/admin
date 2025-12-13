@@ -5,7 +5,7 @@ import api from '../lib/api';
 import { Eye } from 'lucide-react';
 
 const AttemptsList = ({ testId }) => {
-    const [page, setPage] = useState(0);
+    const [page, _setPage] = useState(0);
     const limit = 10;
 
     const { data, isLoading } = useQuery({

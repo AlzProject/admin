@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -15,7 +15,7 @@ const Login = () => {
     try {
       await login(email, password);
       navigate('/');
-    } catch (err) {
+    } catch (_err) {
       setError('Invalid credentials. Please try again.');
     }
   };

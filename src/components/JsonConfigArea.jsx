@@ -1,34 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+
+const formatJsonValue = (value) => {
+    if (value === undefined || value === null) return '';
+    return JSON.stringify(value, null, 2);
+};
 
 const JsonConfigArea = ({ value, onChange, label = "Config (JSON)" }) => {
-    // Initialize text state from props
-    const [text, setText] = useState(value ? JSON.stringify(value, null, 2) : '');
+    const [draft, setDraft] = useState(() => formatJsonValue(value));
+    const [isDirty, setIsDirty] = useState(false);
     const [error, setError] = useState(null);
-  
-    // Update text when value prop changes externally (e.g. loading data)
-    useEffect(() => {
-        if (value === undefined || value === null) {
-            if (text !== '') setText(''); // Only clear if not already clear/typing
-        } else {
-             // Check if the current text parses to the same value to avoid cursor jumps or re-renders if possible
-             // For simplicity, we just update if they are structurally different or if text is empty but value exists
-             try {
-                 const currentParsed = text ? JSON.parse(text) : null;
-                 if (JSON.stringify(currentParsed) !== JSON.stringify(value)) {
-                     setText(JSON.stringify(value, null, 2));
-                 }
-             } catch (e) {
-                 // If current text is invalid JSON, don't overwrite it with valid JSON from props 
-                 // unless we explicitly want to reset (which usually happens via key change or parent reset)
-                 // But here, let's trust the prop if it changes.
-                 setText(JSON.stringify(value, null, 2));
-             }
-        }
-    }, [value]);
+
+    const text = isDirty ? draft : formatJsonValue(value);
 
     const handleChange = (e) => {
       const newText = e.target.value;
-      setText(newText);
+            setDraft(newText);
+            setIsDirty(true);
       if (!newText.trim()) {
           onChange(null);
           setError(null);
@@ -38,7 +25,7 @@ const JsonConfigArea = ({ value, onChange, label = "Config (JSON)" }) => {
           const parsed = JSON.parse(newText);
           onChange(parsed);
           setError(null);
-      } catch (err) {
+            } catch {
           setError("Invalid JSON");
       }
     };
@@ -51,6 +38,12 @@ const JsonConfigArea = ({ value, onChange, label = "Config (JSON)" }) => {
           rows={4}
           value={text}
           onChange={handleChange}
+                    onBlur={() => {
+                        if (!error) {
+                            setIsDirty(false);
+                            setDraft(formatJsonValue(value));
+                        }
+                    }}
           placeholder="{}"
         />
         {error && <span className="text-neo-error text-xs font-bold block mt-1">{error}</span>}
