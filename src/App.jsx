@@ -6,6 +6,7 @@ import Tests from './pages/Tests';
 import TestEditor from './pages/TestEditor';
 import TestAttempts from './pages/TestAttempts';
 import AttemptDetails from './pages/AttemptDetails';
+import PatientStats from './pages/PatientStats';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -19,6 +20,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/patient-stats" element={<PatientStats />} />
             <Route path="/tests" element={<Tests />} />
             <Route path="/tests/:id" element={<TestEditor />} />
             <Route path="/tests/:id/attempts" element={<TestAttempts />} />

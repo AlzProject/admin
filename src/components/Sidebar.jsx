@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth';
-import { LayoutDashboard, Users, FileText, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Activity, FileText, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 
 const Sidebar = () => {
@@ -16,6 +16,7 @@ const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Users', path: '/users', icon: Users },
+    { name: 'Patient Stats', path: '/patient-stats', icon: Activity },
     { name: 'Tests', path: '/tests', icon: FileText },
   ];
 
