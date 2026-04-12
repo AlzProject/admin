@@ -228,10 +228,17 @@ components:
           type: integer
         sectionId:
           type: integer
+        parentId:
+          type: integer
+          nullable: true
         text:
           type: string
         type:
           $ref: "#/components/schemas/QuestionType"
+        isGradable:
+          type: boolean
+          default: true
+          description: If false, question has no anwer and isn't scored directly (e.g. parent questions)
         ans:
           type: string
           nullable: true
@@ -261,6 +268,13 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/QuestionType"
+        parentId:
+          type: integer
+          nullable: true
+          description: Pass to make this question a subquestion of another
+        isGradable:
+          type: boolean
+          default: true
         ans:
           type: string
         maxScore:
@@ -495,6 +509,11 @@ components:
       properties:
         text:
           type: string
+        parentId:
+          type: integer
+          nullable: true
+        isGradable:
+          type: boolean
         type:
           $ref: "#/components/schemas/QuestionType"
         ans:
