@@ -57,8 +57,8 @@ jq -c '.[]' "$DATA_FILE" | while read -r test_item; do
     TEST_PAYLOAD=$(jq -n \
         --arg title "$TITLE" \
         --arg desc "$DESCRIPTION" \
-        --arg lang "$LANGUAGE" \
-        '{title: $title, description: $desc, test_specific_info: {language: $lang}, isActive: true}')
+        --argjson testSpecificInfo "$(echo "$test_item" | jq -c '.test_specific_info // {}')" \
+        '{title: $title, description: $desc, test_specific_info: $testSpecificInfo, isActive: true}')
         
     TEST_RESPONSE=$(curl -s -X POST "$API_URL/tests" \
         -H "Content-Type: application/json" \

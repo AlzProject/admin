@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import api from '../lib/api';
-import { Search, User, ClipboardList, Activity } from 'lucide-react';
+import { Search, User, ClipboardList, Activity, ArrowRight } from 'lucide-react';
 
 const PatientStats = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,6 +84,57 @@ const PatientStats = () => {
     return test ? test.title : `Test #${testId}`;
   };
 
+  const renderInfoValue = (value) => {
+    if (!value) return String(value);
+    let parsedValue = value;
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        if (typeof parsed === 'object' && parsed !== null) {
+          parsedValue = parsed;
+        }
+      } catch (e) {
+        // Not a JSON string
+      }
+    }
+
+    if (Array.isArray(parsedValue)) {
+      if (parsedValue.length === 0) return 'None';
+      if (typeof parsedValue[0] === 'object') {
+        return (
+          <div className="flex flex-col gap-3 my-1">
+            {parsedValue.map((item, idx) => (
+              <div key={idx} className="p-3 bg-white border border-gray-300 shadow-sm rounded-md space-y-1">
+                {Object.entries(item).map(([ik, iv]) => (
+                  <div key={ik} className="text-sm flex flex-col sm:flex-row sm:gap-2">
+                    <span className="font-bold text-gray-700 capitalize w-1/3">{ik.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                    <span className="text-gray-900 flex-1">{String(iv || '—')}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        );
+      }
+      return parsedValue.join(', ');
+    }
+
+    if (typeof parsedValue === 'object' && parsedValue !== null) {
+      return (
+        <div className="flex flex-col gap-1 my-1 p-2 bg-gray-50 border border-gray-200 rounded-md">
+          {Object.entries(parsedValue).map(([ik, iv]) => (
+            <div key={ik} className="text-sm flex gap-2">
+              <span className="font-bold text-gray-700 capitalize">{ik.replace(/([A-Z])/g, ' $1').trim()}:</span>
+              <span>{typeof iv === 'object' ? JSON.stringify(iv) : String(iv || '—')}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return String(value);
+  };
+
   return (
     <div className="flex h-[calc(100vh-8rem)] gap-6">
       {/* LEFT PANEL: PATIENT LIST */}
@@ -98,7 +150,7 @@ const PatientStats = () => {
               placeholder="Search patients..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="neo-input w-full pl-10 py-2 text-sm"
+              className="neo-input w-full !pl-10 py-2 text-sm"
             />
           </div>
         </div>
@@ -128,7 +180,7 @@ const PatientStats = () => {
       </div>
 
       {/* RIGHT PANEL: STATS & DETAILS */}
-      <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
+      <div className="flex-1 flex flex-col gap-6">
         {!selectedUserId ? (
           <div className="flex-1 flex items-center justify-center bg-neo-white border-2 border-neo-black shadow-neo">
             <div className="text-center text-gray-500 font-bold text-xl flex flex-col items-center gap-4">
@@ -143,14 +195,14 @@ const PatientStats = () => {
         ) : (
           <>
             {/* User Info Table */}
-            <div className="bg-neo-white border-2 border-neo-black shadow-neo overflow-hidden">
-              <div className="p-4 border-b-2 border-neo-black bg-neo-black text-neo-white">
+            <div className="bg-neo-white border-2 border-neo-black shadow-neo flex flex-col flex-1 min-h-0">
+              <div className="p-4 border-b-2 border-neo-black bg-neo-black text-neo-white shrink-0">
                 <h3 className="text-xl font-black uppercase flex items-center gap-2">
                   <ClipboardList size={20} />
                   Patient Information
                 </h3>
               </div>
-              <div className="p-0">
+              <div className="p-0 overflow-y-auto flex-1">
                 <table className="w-full text-left border-collapse">
                   <tbody>
                     <tr className="border-b-2 border-neo-black">
@@ -171,8 +223,8 @@ const PatientStats = () => {
                     {userDetails?.user_specific_info && Object.entries(userDetails.user_specific_info).map(([k, v]) => (
                       <tr key={k} className="border-b-2 border-neo-black">
                         <th className="p-3 font-bold bg-neo-bg w-1/3 capitalize text-wrap">{k.replace(/_/g, ' ')}</th>
-                        <td className="p-3 font-medium">
-                          {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                        <td className="p-3 font-medium align-top">
+                          {renderInfoValue(v)}
                         </td>
                       </tr>
                     ))}
@@ -182,14 +234,14 @@ const PatientStats = () => {
             </div>
 
             {/* Test Scores Table */}
-            <div className="bg-neo-white border-2 border-neo-black shadow-neo overflow-hidden">
-              <div className="p-4 border-b-2 border-neo-black bg-neo-black text-neo-white">
+            <div className="bg-neo-white border-2 border-neo-black shadow-neo flex flex-col flex-1 min-h-0">
+              <div className="p-4 border-b-2 border-neo-black bg-neo-black text-neo-white shrink-0">
                 <h3 className="text-xl font-black uppercase flex items-center gap-2">
                   <Activity size={20} />
                   Test Scores
                 </h3>
               </div>
-              <div className="p-0">
+              <div className="p-0 overflow-y-auto flex-1">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-neo-bg border-b-2 border-neo-black">
@@ -197,12 +249,13 @@ const PatientStats = () => {
                       <th className="p-3 font-bold uppercase text-sm">Status</th>
                       <th className="p-3 font-bold uppercase text-sm">Date</th>
                       <th className="p-3 font-bold uppercase text-sm text-right">Score</th>
+                      <th className="p-3 font-bold uppercase text-sm text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(!attemptsData?.items || attemptsData.items.length === 0) ? (
                       <tr>
-                        <td colSpan="4" className="p-6 text-center font-bold text-gray-500">
+                        <td colSpan="5" className="p-6 text-center font-bold text-gray-500">
                           No test attempts found for this patient.
                         </td>
                       </tr>
@@ -222,8 +275,27 @@ const PatientStats = () => {
                           <td className="p-3 font-medium">
                             {new Date(attempt.startedAt).toLocaleDateString()}
                           </td>
-                          <td className="p-3 font-mono font-bold text-lg text-right">
+                          <td className="p-3 font-mono font-bold text-lg text-right w-16">
                             {attempt.totalScore != null ? Number(attempt.totalScore).toFixed(2) : '-'}
+                          </td>
+                          <td className="p-3 text-right">
+                            {attempt.status === 'submitted' ? (
+                              <Link 
+                                to={`/attempts/${attempt.id}`}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-neo-warning border-2 border-neo-black font-bold text-xs uppercase hover:bg-yellow-400 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                              >
+                                Grade
+                                <ArrowRight size={14} />
+                              </Link>
+                            ) : attempt.status === 'graded' ? (
+                              <Link 
+                                to={`/attempts/${attempt.id}`}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-neo-bg border-2 border-neo-black font-bold text-xs uppercase hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                              >
+                                View
+                                <ArrowRight size={14} />
+                              </Link>
+                            ) : null}
                           </td>
                         </tr>
                       ))
