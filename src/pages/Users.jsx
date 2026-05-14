@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
-import { Trash2, Plus, UserPlus } from 'lucide-react';
+import { Trash2, Plus, UserPlus, Download } from 'lucide-react';
 import Modal from '../components/Modal';
+import { generateAdniCsv } from '../lib/adniExport';
 
 const Users = () => {
   const [page, setPage] = useState(0);
@@ -62,13 +63,22 @@ const Users = () => {
     <div>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-4xl font-black uppercase">User Management</h2>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="neo-btn flex items-center gap-2"
-        >
-          <UserPlus size={20} />
-          Add User
-        </button>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => generateAdniCsv()}
+            className="neo-btn flex items-center gap-2"
+          >
+            <Download size={20} />
+            Export ADNI CSV
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="neo-btn flex items-center gap-2"
+          >
+            <UserPlus size={20} />
+            Add User
+          </button>
+        </div>
       </div>
 
       <div className="bg-neo-white border-2 border-neo-black shadow-neo overflow-hidden">
